@@ -1,0 +1,50 @@
+body {
+  background-color: #F5F7FB;
+  margin: 0;
+  padding: 10px;
+}
+
+button {
+  border: none;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.listItem {
+  /* box-sizing: border-box; */
+  width: calc(100% - 60px);
+  height: 50px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #000000;
+  padding: 10px;
+  height: fit-content;
+}
+
+ul {
+  list-style-type: none;
+}
+
+.listButton {
+  float: right;
+  margin-right: 10px;
+  background-color: #cecece;
+}
+
+.listTimeStamp {
+  color: #969696;
+  font-size: 12px;
+  margin-left: 10px;
+}
+
+.editInput {
+  width: 500px;
+}
+
+.editInput {
+  width: 500px;
+  border: 1px solid black;
+}
+
+.error {
+  color: red;
+}
