@@ -3,7 +3,15 @@ import { format } from 'date-fns'
 import { useEffect, useState } from 'react'
 import React from 'react';
 import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import bookletLogo from "./images/bookletLogo.png"
+import blobBlue from "./images/blobBlue.png"
+import blobYellow from "./images/blobYellow.png"
 import "bootstrap/dist/css/bootstrap.min.css";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons'
+import noNotes from "./images/noNotes.png"
+
 
 import './App.css';
 
@@ -87,10 +95,11 @@ function App() {
   }, [])
   return (
     <div className="App">
+      <img src={bookletLogo} alt="Booklet logo. A book with 'Booklet' next to it." />
+      <img src={blobBlue} className="blueBlob" alt="" />
+      <img src={blobYellow} className="yellowBlob" alt="" />
+      <br /><br /><br />
       <section>
-        <Button variant="primary" onClick={handleShow}>
-          New Note
-        </Button>
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>New Note</Modal.Title>
@@ -109,7 +118,7 @@ function App() {
               />
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="primary" type='submit' onClick={() => {
+              <Button className="primaryBtn" type='submit' onClick={() => {
                 if (document.getElementById("description").value) {
                   handleClose()
                 }
@@ -121,12 +130,24 @@ function App() {
         </Modal>
       </section>
       <section>
+        {
+          eventList.length == 0 ?
+            <div className='noNotes'>
+              <img src={noNotes} width="300px" />
+              <h3>Where did all your books notes go!</h3>
+              <h6>You don’t seem to have any book notes!</h6>
+            </div> :
+            ""
+        }
         <ul>
+          {
+            console.log(eventList)
+          }
           {eventList.map(event => {
             if (eventId === event.id) {
               return (
                 <form onSubmit={(e) => { handleSubmit(e, 'edit') }} key={event.id} className="listItem">
-                  <p className="error" id="editError"></p>
+                  <span className="error" id="editError"></span>
                   <input
                     onChange={(e) => handleChange(e, 'edit')}
                     type="text"
@@ -144,13 +165,24 @@ function App() {
                 <li key={event.id} className="listItem">
                   {event.description}
                   <span className="listTimeStamp">{format(new Date(event.created_at), "MMM/dd, p")}</span>
-                  <button className="listButton" onClick={() => handleEdit(event)}>Edit</button>
-                  <button className="listButton" onClick={() => handleDelete(event.id)}>Delete</button>
+                  <span className="listBtnHolder">
+                    <button className="listButton" onClick={() => handleEdit(event)}>
+                      <FontAwesomeIcon icon={faPenToSquare} />
+                    </button>
+                    <button className="listButton" onClick={() => handleDelete(event.id)}>
+                      <FontAwesomeIcon icon={faTrashCan} />
+                    </button>
+                  </span>
                 </li>
               )
             }
           })}
         </ul>
+        <div className=''>
+          <Button className="primaryBtn addNoteBtn" onClick={handleShow}>
+            New Note
+          </Button>
+        </div>
       </section>
     </div >
   );

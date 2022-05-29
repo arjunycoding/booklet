@@ -11,23 +11,31 @@ button {
 }
 
 .listItem {
-  /* box-sizing: border-box; */
-  width: calc(100% - 60px);
+  width: calc(100% - 100px);
   height: 50px;
-  background: #FFFFFF;
   border-bottom: 1px solid #000000;
   padding: 10px;
   height: fit-content;
 }
 
+
+.listItem:hover {
+  background-color: #e7e9ed;
+}
+
+
 ul {
   list-style-type: none;
 }
 
-.listButton {
+.listBtnHolder {
   float: right;
+}
+
+.listButton {
+  margin-top: -10px;
   margin-right: 10px;
-  background-color: #cecece;
+  background-color: inherit;
 }
 
 .listTimeStamp {
@@ -38,13 +46,52 @@ ul {
 
 .editInput {
   width: 500px;
+  padding: 5px 10px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 1.25px solid #ccc;
+  border-radius: 5px;
+  margin-right: 10px;
+  -webkit-transition: 0.5s;
+  transition: 0.5s;
+  outline: none;
 }
 
-.editInput {
-  width: 500px;
-  border: 1px solid black;
+.editInput:focus {
+  border: 1.25px solid #7f7f7f;
 }
 
 .error {
   color: red;
+}
+
+.yellowBlob {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.blueBlob {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.primaryBtn,
+.primaryBtn:hover,
+.primaryBtn:active,
+.primaryBtn:focus {
+  background-color: #4D5B9E;
+  border: none;
+}
+
+.addNoteBtn {
+  width: 100px;
+  margin: auto;
+}
+
+.noNotes {
+  margin: auto;
+  width: 50%;
+  text-align: center;
 }
