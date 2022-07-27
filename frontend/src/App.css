@@ -46,19 +46,6 @@ ul {
 
 .editInput {
   width: 500px;
-  padding: 5px 10px;
-  margin: 8px 0;
-  box-sizing: border-box;
-  border: 1.25px solid #ccc;
-  border-radius: 5px;
-  margin-right: 10px;
-  -webkit-transition: 0.5s;
-  transition: 0.5s;
-  outline: none;
-}
-
-.editInput:focus {
-  border: 1.25px solid #7f7f7f;
 }
 
 .error {
@@ -78,20 +65,70 @@ ul {
 }
 
 .primaryBtn,
-.primaryBtn:hover,
 .primaryBtn:active,
 .primaryBtn:focus {
-  background-color: #4D5B9E;
+  background-color: #5a6ab9;
   border: none;
+}
+
+.primaryBtn:hover {
+  background-color: #3a4478;
+
+
 }
 
 .addNoteBtn {
   width: 100px;
-  margin: auto;
+  height: 50px;
+  text-align: center;
 }
 
 .noNotes {
   margin: auto;
   width: 50%;
   text-align: center;
+}
+
+.btnContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+}
+
+input,
+textarea {
+  padding: 5px 10px;
+  margin: 8px 0 10px 10px;
+  box-sizing: border-box;
+  border: 1.25px solid #ccc;
+  border-radius: 5px;
+  margin-right: 10px;
+  transition: 0.5s;
+  outline: none;
+}
+
+input:focus,
+textarea:focus {
+  border: 1.25px solid #7f7f7f;
+}
+
+.textarea {
+  min-height: 77px;
+  max-height: 182px;
+  width: 300px;
+  margin-left: 45px;
+}
+
+#genre1,
+#genre2,
+#genre3 {
+  display: inline-block;
+}
+
+.loginForm {
+  width: 50%;
+  height: 50%;
+  text-align: center;
+  margin-left: 25%;
 }
