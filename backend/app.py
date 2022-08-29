@@ -10,9 +10,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:arjun@localhost/b
 db = SQLAlchemy(app)
 CORS(app)
 
-# create class of user table, booktable, and joining table
 
-
+# create class of user table, book table
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
@@ -28,43 +27,54 @@ class User(UserMixin, db.Model):
 
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    userNoteId = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(10000), nullable=False)
-    title = db.Column(db.String(100), nullable=False)
-    author = db.Column(db.String(100), nullable=False)
-    quote1 = db.Column(db.String(100), nullable=False)
-    quote2 = db.Column(db.String(100), nullable=False)
-    quote3 = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    author = db.Column(db.String(200), nullable=False)
+    recommendTo = db.Column(db.String(200), nullable=False)
+    recommendedBy = db.Column(db.String(200), nullable=False)
+    lifeLessons = db.Column(db.String(200), nullable=False)
+    quote1 = db.Column(db.String(200), nullable=False)
+    quote2 = db.Column(db.String(200), nullable=False)
+    quote3 = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow)
 
     def __repr__(self):
-        return f"Event: {self.description, self.title, self.author, self.quote1, self.quote2, self.quote3}"
+        return f"Event: {self.description, self.title, self.author, self.recommendTo, self.recommendedBy, self.lifeLessons ,self.quote1, self.quote2, self.quote3, self.user_id}"
 
-    def __init__(self, description, title, author, quote1, quote2, quote3, userNoteId):
+    def __init__(self, description, title, author, recommendTo, recommendedBy, lifeLessons, quote1, quote2, quote3, user_id):
         self.description = description
         self.title = title
         self.author = author
+        self.recommendTo = recommendTo
+        self.recommendedBy = recommendedBy
+        self.lifeLessons = lifeLessons
         self.quote1 = quote1
         self.quote2 = quote2
         self.quote3 = quote3
-        self.userNoteId = userNoteId
+        self.user_id = user_id
 
 
+# return the event passed into an easier format
 def format_event(event):
     return {
         "description": event.description,
         "title": event.title,
         "author": event.author,
+        "recommendTo": event.recommendTo,
+        "recommendedBy": event.recommendedBy,
+        "lifeLessons": event.lifeLessons,
         "quote1": event.quote1,
         "quote2": event.quote2,
         "quote3": event.quote3,
         "id": event.id,
         "created_at": event.created_at,
-        "userNoteId": 1
+        "user_id": event.user_id
     }
 
 
+# index
 @app.route('/')
 def index():
     return
@@ -76,12 +86,16 @@ def create_event():
     description = request.json['description']
     title = request.json['title']
     author = request.json['author']
+    recommendTo = request.json['recommendTo']
+    recommendedBy = request.json['recommendedBy']
+    lifeLessons = request.json['lifeLessons']
     quote1 = request.json['quote1']
     quote2 = request.json['quote2']
     quote3 = request.json['quote3']
+    user_id = request.json['user_id']
 
-    event = Note(description, title, author, quote1,
-                 quote2, quote3, userNoteId=1)
+    event = Note(description, title, author, recommendTo, recommendedBy, lifeLessons, quote1,
+                 quote2, quote3, user_id)
     print(event)
     db.session.add(event)
     db.session.commit()
@@ -106,6 +120,7 @@ def get_event(id):
     return {'event': formatted_event}
 
 
+# delete an event
 @app.route('/event/<id>', methods=['DELETE'])
 def delete_event(id):
     event = Note.query.filter_by(id=id).one()
@@ -121,6 +136,9 @@ def update_event(id):
     description = request.json['description']
     title = request.json['title']
     author = request.json['author']
+    recommendTo = request.json['recommendTo']
+    recommendedBy = request.json['recommendedBy']
+    lifeLessons = request.json['lifeLessons']
     quote1 = request.json['quote1']
     quote2 = request.json['quote2']
     quote3 = request.json['quote3']
@@ -128,40 +146,81 @@ def update_event(id):
                       created_at=datetime.utcnow(),
                       title=title,
                       author=author,
+                      recommendTo=recommendTo,
+                      recommendedBy=recommendedBy,
+                      lifeLessons=lifeLessons,
                       quote1=quote1,
                       quote2=quote2,
-                      quote3=quote3,
-                      userNoteId=1))
+                      quote3=quote3
+                      ))
     db.session.commit()
     return {'event': format_event(event.one())}
 
 
 # Create A User
-@app.route('/signup', methods=['POST', 'GET'])
-def signup():
+@app.route('/sign_up', methods=['POST'])
+def sign_up():
     email = request.json['email']
     username = request.json['username']
     password = request.json['password']
+    emailTaken = User.query.filter_by(email=email).first()
+    usernameTaken = User.query.filter_by(username=username).first()
+    print(User.query.filter_by(email=email).first(),
+          User.query.filter_by(username=username).first())
+    if emailTaken or usernameTaken:
+        return "Your username or email has already been taken"
     user = User(username, password, email)
     db.session.add(user)
     db.session.commit()
     return 'Signed Up'
 
 
-@app.route('/login', methods=['POST', 'GET'])
+# Login a user
+@app.route('/login', methods=['POST'])
 def login():
     username = request.json['username']
     password = request.json['password']
     user = User.query.filter_by(username=username).first()
-    accountInfo = f"""
-        Username: {user.username}
-        Password: {user.password}
-        Email: {user.email}
-    """
     if user:
         if user.password == password:
-            return "authenticated"
+            return f"{user.id}"
     return "Incorrect username or password"
+
+
+# reset password
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    username = request.json['username']
+    email = request.json['email']
+    new_password = request.json['new_password']
+    user = User.query.filter_by(username=username)
+    if user:
+        user.update(dict(
+            username=username,
+            email=email,
+            password=new_password
+        ))
+        db.session.commit()
+        return "Successfully reset password"
+    return "Incorrect username or email"
+
+
+# gets the password from a user
+@app.route('/get_user', methods=['POST'])
+def get_user():
+    username = request.json['username']
+    user = User.query.filter_by(username=username).first()
+    if user:
+        return user.password
+
+
+# gets the id from a user
+@app.route('/get_user_id', methods=['POST'])
+def get_user_id():
+    username = request.json['username']
+    user = User.query.filter_by(username=username).first()
+    if user:
+        return f"{user.id} {type(user)}"
 
 
 if __name__ == '__main__':
