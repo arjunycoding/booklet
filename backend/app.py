@@ -33,26 +33,24 @@ class Note(db.Model):
     author = db.Column(db.String(200), nullable=False)
     recommendTo = db.Column(db.String(200), nullable=False)
     recommendedBy = db.Column(db.String(200), nullable=False)
-    lifeLessons = db.Column(db.String(200), nullable=False)
-    quote1 = db.Column(db.String(200), nullable=False)
-    quote2 = db.Column(db.String(200), nullable=False)
-    quote3 = db.Column(db.String(200), nullable=False)
+    lifeLessons = db.Column(db.String(10000), nullable=False)
+    quotes = db.Column(db.String(10000), nullable=False)
+    notes = db.Column(db.String(10000), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow)
 
     def __repr__(self):
-        return f"Event: {self.description, self.title, self.author, self.recommendTo, self.recommendedBy, self.lifeLessons ,self.quote1, self.quote2, self.quote3, self.user_id}"
+        return f"Event: {self.description, self.title, self.author, self.recommendTo, self.recommendedBy, self.lifeLessons, self.quotes, self.notes, self.user_id}"
 
-    def __init__(self, description, title, author, recommendTo, recommendedBy, lifeLessons, quote1, quote2, quote3, user_id):
+    def __init__(self, description, title, author, recommendTo, recommendedBy, lifeLessons, quotes, notes, user_id):
         self.description = description
         self.title = title
         self.author = author
         self.recommendTo = recommendTo
         self.recommendedBy = recommendedBy
         self.lifeLessons = lifeLessons
-        self.quote1 = quote1
-        self.quote2 = quote2
-        self.quote3 = quote3
+        self.notes = notes
+        self.quotes = quotes
         self.user_id = user_id
 
 
@@ -65,9 +63,8 @@ def format_event(event):
         "recommendTo": event.recommendTo,
         "recommendedBy": event.recommendedBy,
         "lifeLessons": event.lifeLessons,
-        "quote1": event.quote1,
-        "quote2": event.quote2,
-        "quote3": event.quote3,
+        "quotes": event.quotes,
+        "notes": event.notes,
         "id": event.id,
         "created_at": event.created_at,
         "user_id": event.user_id
@@ -89,13 +86,21 @@ def create_event():
     recommendTo = request.json['recommendTo']
     recommendedBy = request.json['recommendedBy']
     lifeLessons = request.json['lifeLessons']
-    quote1 = request.json['quote1']
-    quote2 = request.json['quote2']
-    quote3 = request.json['quote3']
+    notes = request.json['notes']
+    quotes = request.json['quotes']
     user_id = request.json['user_id']
 
-    event = Note(description, title, author, recommendTo, recommendedBy, lifeLessons, quote1,
-                 quote2, quote3, user_id)
+    event = Note(
+        description,
+        title,
+        author,
+        recommendTo,
+        recommendedBy,
+        lifeLessons,
+        quotes,
+        notes,
+        user_id
+    )
     print(event)
     db.session.add(event)
     db.session.commit()
@@ -139,9 +144,8 @@ def update_event(id):
     recommendTo = request.json['recommendTo']
     recommendedBy = request.json['recommendedBy']
     lifeLessons = request.json['lifeLessons']
-    quote1 = request.json['quote1']
-    quote2 = request.json['quote2']
-    quote3 = request.json['quote3']
+    notes = request.json['notes']
+    quotes = request.json['quotes']
     event.update(dict(description=description,
                       created_at=datetime.utcnow(),
                       title=title,
@@ -149,9 +153,8 @@ def update_event(id):
                       recommendTo=recommendTo,
                       recommendedBy=recommendedBy,
                       lifeLessons=lifeLessons,
-                      quote1=quote1,
-                      quote2=quote2,
-                      quote3=quote3
+                      quotes=quotes,
+                      notes=notes
                       ))
     db.session.commit()
     return {'event': format_event(event.one())}

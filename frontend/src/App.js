@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons'
 import noNotes from "./images/noNotes.png"
 import ReactMde from "react-mde"
+import ReactMarkdown from 'https://esm.sh/react-markdown@7'
 import Showdown from "showdown"
 import "react-mde/lib/styles/css/react-mde-all.css";
 import './App.css';
@@ -19,9 +20,9 @@ import './App.css';
 const baseUrl = "http://127.0.0.1:5000"
 
 function App() {
-  /************\
-   | USER NOTES |
-   \************/
+  /******************\
+  | USER NOTE FIELDS |
+  \******************/
   const [description, setDescription] = useState("")
   const [editDescription, setEditDescription] = useState("")
 
@@ -31,14 +32,8 @@ function App() {
   const [author, setAuthor] = useState("")
   const [editAuthor, setEditAuthor] = useState("")
 
-  const [quote1, setQuote1] = useState("")
-  const [editQuote1, setEditQuote1] = useState("")
-
-  const [quote2, setQuote2] = useState("")
-  const [editQuote2, setEditQuote2] = useState("")
-
-  const [quote3, setQuote3] = useState("")
-  const [editQuote3, setEditQuote3] = useState("")
+  const [quotes, setQuotes] = useState("")
+  const [editQuotes, setEditQuotes] = useState("")
 
   const [recommendedBy, setRecommendedBy] = useState("")
   const [editRecommendedBy, setEditRecommendedBy] = useState("")
@@ -139,23 +134,11 @@ function App() {
       } else {
         setAuthor(e.target.value)
       }
-    } else if (felidName === "quote1") {
+    } else if (felidName === "quotes") {
       if (felid === 'edit') {
-        setEditQuote1(e.target.value)
+        setEditQuotes(e.target.value)
       } else {
-        setQuote1(e.target.value)
-      }
-    } else if (felidName === "quote2") {
-      if (felid === 'edit') {
-        setEditQuote2(e.target.value)
-      } else {
-        setQuote2(e.target.value)
-      }
-    } else if (felidName === "quote3") {
-      if (felid === 'edit') {
-        setEditQuote3(e.target.value)
-      } else {
-        setQuote3(e.target.value)
+        setQuotes(e.target.value)
       }
     } else if (felidName === "recommendTo") {
       if (felid === 'edit') {
@@ -177,7 +160,7 @@ function App() {
       }
     } else if (felidName === "notes") {
       if (felid === 'edit') {
-        setEditNotes(e.target.value)
+        setEditNotes(e)
       } else {
         setNotes(e)
       }
@@ -225,12 +208,12 @@ function App() {
     e.preventDefault()
     let inputToValidate
     if (eventFor === 'add') {
-      inputToValidate = title && author && description
+      inputToValidate = title === "" && author === "" && description === ""
     } else {
-      inputToValidate = editTitle && editAuthor && editDescription
+      inputToValidate = editTitle === "" && editAuthor === "" && editDescription === ""
     }
     let errorEl = eventFor === 'add' ? document.getElementById("error") : document.getElementById("editError")
-    if (inputToValidate === editDescription) {
+    if (inputToValidate === false) {
       try {
         if (editDescription) {
           const data = await axios.put(`${baseUrl}/event/${eventId}`, {
@@ -240,9 +223,8 @@ function App() {
             "recommendTo": editRecommendTo,
             "recommendedBy": editRecommendedBy,
             "lifeLessons": editLifeLessons,
-            "quote1": editQuote1,
-            "quote2": editQuote2,
-            "quote3": editQuote3
+            "quotes": editQuotes,
+            "notes": editNotes
           })
           const updatedEvent = data.data.event
           const updatedList = eventList.map(event => {
@@ -258,12 +240,11 @@ function App() {
             "description": description,
             "title": title,
             "author": author,
-            "quote1": quote1,
-            "quote2": quote2,
-            "quote3": quote3,
+            "quotes": quotes,
             "recommendTo": recommendTo,
             "recommendedBy": recommendedBy,
             "lifeLessons": lifeLessons,
+            "notes": notes,
             "user_id": noteId
           })
           setEventList([...eventList, data.data])
@@ -277,14 +258,8 @@ function App() {
         setAuthor('')
         setEditAuthor('')
 
-        setQuote2('')
-        setEditQuote2('')
-
-        setQuote1('')
-        setEditQuote1('')
-
-        setQuote3('')
-        setEditQuote3('')
+        setQuotes('')
+        setEditQuotes('')
 
         setRecommendTo('')
         setEditRecommendTo('')
@@ -302,11 +277,12 @@ function App() {
       } catch (err) {
       }
     } else {
-      errorEl.innerHTML = "Please make sure you have entered <i>all</i> the felids"
+      errorEl.innerHTML = "Please make sure you have entered the <i>all required</i> felids"
     }
 
   }
   async function handleDelete(id) {
+    handleViewClose()
     try {
       await axios.delete(`${baseUrl}/event/${id}`)
       const updatedList = eventList.filter(event => event.id !== id)
@@ -320,9 +296,7 @@ function App() {
     setEditDescription(event.description)
     setEditTitle(event.title)
     setEditAuthor(event.author)
-    setEditQuote2(event.quote2)
-    setEditQuote1(event.quote1)
-    setEditQuote3(event.quote3)
+    setEditQuotes(event.quotes)
     handleEditShow()
   }
   function handleClick(event) {
@@ -361,6 +335,28 @@ function App() {
       return res.data
     })
     return data
+  }
+
+  function generateBookNotePreview(details) {
+    const title = details.title
+    const author = details.author
+    const description = <div><h5>Summary/Description Of The Book</h5>{details.description}<br /><br /></div>
+    const recommendedBy = details.recommendedBy === '' ? <span></span> : <div><p>{details.recommendedBy} recommended <i>{details.title}</i> to me</p></div>
+    const recommendTo = details.recommendTo === '' ? <span></span> : <div><p>I would recommend <i>{details.title}</i> to {details.recommendTo}</p></div>
+    const lifeLessons = details.lifeLessons === '' ? <span></span> : <div><h5>Life Lessons</h5>{details.lifeLessons}<br /><br /></div>
+    const quotes = details.quotes === '' ? <span></span> : <div><h5>Favorite Quotes</h5>{details.quotes}</div>
+    const notes = details.notes === '' ? <span></span> : <div><h5>Your Notes:</h5><div className='preview-markdown-editor'><ReactMarkdown children={details.notes} className="markdown" /></div></div>
+    return {
+      "header": <span>{title} by {author}</span>,
+      "content": <div>
+        {description}
+        {recommendedBy}
+        {recommendTo}
+        {lifeLessons}
+        {quotes}
+        {notes}
+      </div>
+    }
   }
   return (
     <div className="App">
@@ -513,7 +509,7 @@ function App() {
                         placeholder="Adventure lovers"
                         value={recommendTo}
                       /> <br />
-                      <label>What Life Lessons Did You learn From This Book:</label>
+                      <label>What Life Lessons Did You learn From This Book:</label><br />
                       <textarea
                         className="textarea"
                         onChange={(e) => handleChange(e, "lifeLessons", "lifeLessons")}
@@ -523,41 +519,17 @@ function App() {
                         placeholder="What was your takeaway after reading this book"
                         value={lifeLessons}
                       ></textarea><br />
-                      <label>Top Three Quotes: </label>
-                      <ul>
-                        <li>
-                          <input
-                            onChange={(e) => handleChange(e, "quote1", "quote1")}
-
-                            type="text"
-                            name="quote1"
-                            id="quote1"
-                            placeholder="Quote 1"
-                            value={quote1}
-                          /> <br />
-                        </li>
-                        <li>
-                          <input
-                            onChange={(e) => handleChange(e, "quote2", "quote2")}
-                            type="text"
-                            name="quote2"
-                            id="quote2"
-                            placeholder="Quote 2"
-                            value={quote2}
-                          /><br />
-                        </li>
-                        <li>
-                          <input
-                            onChange={(e) => handleChange(e, "quote3", "quote3")}
-                            type="text"
-                            name="quote3"
-                            id="quote3"
-                            placeholder="Quote 3"
-                            value={quote3}
-                          />
-                        </li>
-                        <label><h5>Your Notes</h5></label>
-                      </ul>
+                      <label>Favorite Quotes: </label><br />
+                      <textarea
+                        className="textarea"
+                        onChange={(e) => handleChange(e, "quotes", "quotes")}
+                        type="text"
+                        name="quotes"
+                        id="quotes"
+                        placeholder="What were your favorite quotes? Why do you like them?"
+                        value={quotes}
+                      ></textarea><br />
+                      <label><h5>Your Notes</h5></label>
                       <section className="pane editor">
                         <ReactMde
                           value={notes}
@@ -596,7 +568,7 @@ function App() {
                     ""
                 }
 
-                <ul>
+                <ul className="noteList">
                   {eventList.map(event => {
                     if (event.user_id === userNoteId) {
                       if (eventId === event.id) {
@@ -656,7 +628,7 @@ function App() {
                                   placeholder="Adventure lovers"
                                   value={editRecommendTo}
                                 /> <br />
-                                <label>What Life Lessons Did You learn From This Book?</label>
+                                <label>What Life Lessons Did You learn From This Book?</label><br />
                                 <textarea
                                   className="textarea"
                                   onChange={(e) => handleChange(e, "edit", "lifeLessons")}
@@ -666,44 +638,20 @@ function App() {
                                   placeholder="What was your takeaway after reading this book"
                                   value={editLifeLessons}
                                 ></textarea>
-                                <label htmlFor="description">Top Three Quotes: </label>
-                                <ul>
-                                  <li>
-                                    <input
-                                      onChange={(e) => handleChange(e, "edit", "quote1")}
-
-                                      type="text"
-                                      name="quote1"
-                                      id="quote1"
-                                      placeholder="Quote 1"
-                                      value={editQuote1}
-                                    /> <br />
-                                  </li>
-                                  <li>
-                                    <input
-                                      onChange={(e) => handleChange(e, "edit", "quote2")}
-                                      type="text"
-                                      name="quote2"
-                                      id="quote2"
-                                      placeholder="Quote 2"
-                                      value={editQuote2}
-                                    /><br />
-                                  </li>
-                                  <li>
-                                    <input
-                                      onChange={(e) => handleChange(e, "edit", "quote3")}
-                                      type="text"
-                                      name="quote3"
-                                      id="quote3"
-                                      placeholder="Quote 3"
-                                      value={editQuote3}
-                                    />
-                                  </li>
-                                </ul>
+                                <label>Favorite Quotes: </label>
+                                <textarea
+                                  className="textarea"
+                                  onChange={(e) => handleChange(e, "edit", "quotes")}
+                                  type="text"
+                                  name="quotes"
+                                  id="quotes"
+                                  placeholder="What were your favorite quotes? Why do you like them?"
+                                  value={editQuotes}
+                                ></textarea>
                                 <section className="pane editor">
                                   <ReactMde
                                     value={editNotes}
-                                    onChange={(event) => handleChange(event, "notes", "notes")}
+                                    onChange={(event) => handleChange(event, "edit", "notes")}
                                     selectedTab={selectedTab}
                                     onTabChange={setSelectedTab}
                                     generateMarkdownPreview={(markdown) =>
@@ -728,6 +676,7 @@ function App() {
 
                         )
                       } else {
+                        const notePreview = generateBookNotePreview(bookNoteDetails)
                         return (
                           <div key={event.id}>
                             <li key={event.id} className="listItem" onClick={() => { handleClick(event); handleViewShow() }}>
@@ -742,16 +691,11 @@ function App() {
                                 </button>
                               </span>
                             </li>
-                            <Modal className="modal-window" show={viewShow} onHide={handleViewClose}>
-                              <Modal.Header closeButton><Modal.Title>{bookNoteDetails.title}</Modal.Title>
+                            <Modal className="modal-window" show={viewShow} onHide={handleViewClose} size="lg">
+                              <Modal.Header closeButton><Modal.Title>{notePreview.header}</Modal.Title>
                               </Modal.Header>
                               <Modal.Body>
-                                <h5>Summary:</h5>
-                                {bookNoteDetails.description}<br /><br />
-                                <h5>Top Three Quotes:</h5>
-                                <strong>Quote 1: </strong>{bookNoteDetails.quote1}<br />
-                                <strong>Quote 2: </strong>{bookNoteDetails.quote2}<br />
-                                <strong>Quote 3: </strong>{bookNoteDetails.quote3}
+                                {notePreview.content}
                               </Modal.Body>
                               <Modal.Footer>
                                 <Button variant="secondary" onClick={() => setViewShow(false)}>

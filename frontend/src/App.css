@@ -29,7 +29,8 @@ ul {
 }
 
 .listBtnHolder {
-  float: right;
+  position: absolute;
+  right: 10%;
 }
 
 .listButton {
@@ -42,6 +43,10 @@ ul {
   color: #969696;
   font-size: 12px;
   margin-left: 10px;
+}
+
+.noteList {
+  list-style-type: none;
 }
 
 .editInput {
@@ -120,12 +125,6 @@ input:focus,
   margin-left: 45px;
 }
 
-#genre1,
-#genre2,
-#genre3 {
-  display: inline-block;
-}
-
 .loginForm {
   width: 300px;
   margin: auto;
@@ -186,4 +185,28 @@ input:focus,
   color: gray;
   font-size: 10px;
   font-size: italic;
+}
+
+.preview-markdown-editor {
+  padding: 20px;
+  border: 1px solid black;
+}
+
+
+pre {
+  background: #efefef;
+  border-radius: 5px;
+  padding: 20px;
+}
+
+ul {
+  list-style-type: disc;
+}
+
+blockquote {
+  border-radius: 5px;
+  border-left: 10px solid #efefef;
+  padding: 10px 10px 10px 30px;
+  /* padding: top right bottom left */
+
 }
